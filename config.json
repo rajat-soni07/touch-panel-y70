@@ -33,11 +33,17 @@
     "maxMembers": 5
   },
 
+  "steam": {
+    "enabled": true,
+    "count": 12,
+    "exclude": [431960]
+  },
+
   "buttons": [
     { "id": "snip",   "label": "Snipping Tool", "icon": "assets/snipping-tool.png", "cmd": { "cmd": "explorer.exe shell:AppsFolder\\Microsoft.ScreenSketch_8wekyb3d8bbwe!App", "ignoreErrors": true } },
     { "id": "tasks",  "label": "Task Manager",  "icon": "assets/task-manager.png",  "cmd": "start \"\" taskmgr" },
     { "id": "chrome", "label": "Chrome",        "icon": "assets/chrome.png",        "cmd": "start \"\" \"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\"" },
-    { "id": "steam",  "label": "Steam",         "icon": "assets/steam.png",         "cmd": "start \"\" steam://open/main" }
+    { "id": "steam",  "label": "Steam",         "icon": "assets/steam.png",         "popup": "steam", "cmd": "start \"\" steam://open/main" }
   ],
 
   "pageButtons": [

@@ -9,6 +9,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { DiscordVoice } = require('./discord');
+const { recentGames } = require('./steam');
 
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 
@@ -144,7 +145,32 @@ function statusLoop() {
 
 // ---------- button presses ----------
 
-ipcMain.handle('config', () => ({ config, states, discord: discordState }));
+ipcMain.handle('config', () => ({ config, states, discord: discordState, steam: steamState }));
+
+// ---------- steam quick-launch ----------
+
+let steamState = null;
+
+async function steamLoop() {
+  const opts = config.steam || {};
+  if (opts.enabled !== false) {
+    try {
+      const next = await recentGames({ count: opts.count || 6, exclude: opts.exclude || [] });
+      if (JSON.stringify(next) !== JSON.stringify(steamState)) {
+        steamState = next;
+        send('steam', steamState);
+      }
+    } catch (e) {
+      console.error('[panel] steam scan failed:', e.message);
+    }
+  }
+  setTimeout(steamLoop, 15000);
+}
+
+ipcMain.handle('steam-launch', (_e, appId) => {
+  if (!/^\d+$/.test(String(appId))) return { ok: false, err: 'Bad app id' };
+  return run(`start "" steam://rungameid/${appId}`);
+});
 
 // ---------- discord ----------
 
@@ -391,6 +417,7 @@ if (!app.requestSingleInstanceLock()) {
     createWindow();
     statusLoop();
     startDiskMonitor();
+    steamLoop();
     if (!config.discord || config.discord.enabled !== false) {
       discord = new DiscordVoice((s) => {
         discordState = s;

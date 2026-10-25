@@ -82,3 +82,11 @@ The bottom of page 2 shows your current Discord voice channel, who's in it (spea
 4. Discord pops up an **Authorize** dialog the first time — approve it. The panel stores the login tokens in the same file and refreshes them on its own.
 
 `discord-auth.json` is git-ignored; never commit it. Set `"discord": { "enabled": false }` in `config.json` to turn the widget off, and `maxMembers` to change how many people are listed.
+
+## Steam quick-launch
+
+Tapping the **Steam icon in the dock** opens a *Recently played* sheet with your most recently played **installed** games as covers; tap one to launch it (the sheet closes), or use **Open Steam** for the Steam window. Tap outside the sheet or the Steam icon again to close it. The game that's currently running gets an orange outline and a "Playing" badge.
+
+Everything is read from Steam's local files (no login or API key): libraries from `steamapps/libraryfolders.vdf`, last-played times from each `appmanifest_*.acf`, covers from `appcache/librarycache`, and the running game from the `RunningAppID` registry value. The list refreshes every 15 seconds.
+
+`config.json` → `steam`: `count` (how many covers, default 12), `exclude` (app IDs to hide — Wallpaper Engine, 431960, is hidden by default; redistributables and runtimes are always hidden), `enabled: false` to turn it off (the Steam icon then just opens Steam). The sheet is wired to the dock button through `"popup": "steam"` on that button in `buttons`.

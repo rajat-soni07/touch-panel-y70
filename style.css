@@ -245,6 +245,96 @@ html, body {
 .tile.busy .dot { background: var(--accent); animation: blink 1s ease-in-out infinite; }
 .tile.err { box-shadow: inset 0 0 0 calc(0.8 * var(--u)) var(--err); }
 
+/* ---------- steam "recently played" sheet (opened by the dock's Steam icon) ---------- */
+.sheet-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: none;
+}
+.sheet-scrim.open { display: block; }
+
+.games-sheet {
+  position: absolute;
+  z-index: 6;
+  left: calc(2 * var(--u));
+  right: calc(2 * var(--u));
+  bottom: calc(68 * var(--u)); /* just above the dock */
+  max-height: calc(100% - 80 * var(--u));
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding: calc(8 * var(--u));
+  border-radius: calc(8 * var(--u));
+  background: color-mix(in srgb, var(--dock) 96%, transparent);
+  box-shadow: 0 calc(4 * var(--u)) calc(20 * var(--u)) rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: calc(6 * var(--u));
+  opacity: 0;
+  transform: translateY(calc(12 * var(--u)));
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.25s ease;
+}
+.games-sheet::-webkit-scrollbar { display: none; }
+.games-sheet.open { opacity: 1; transform: none; pointer-events: auto; }
+
+.games-head { display: flex; align-items: center; justify-content: space-between; gap: calc(4 * var(--u)); }
+.games-title { font-size: calc(8 * var(--u)); font-weight: 600; color: var(--tile-text); }
+.games-open {
+  all: unset;
+  padding: calc(3 * var(--u)) calc(7 * var(--u));
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--tile-text);
+  font-size: calc(5.5 * var(--u));
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.14s ease;
+}
+.games-open.pressed { transform: scale(0.95); }
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(6 * var(--u));
+}
+
+.game {
+  all: unset;
+  position: relative;
+  aspect-ratio: 2 / 3;
+  border-radius: calc(6 * var(--u));
+  overflow: hidden;
+  background: var(--dock);
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.25s, opacity 0.2s;
+}
+.game img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.game .game-name {
+  position: absolute;
+  inset: auto 0 0;
+  padding: calc(5 * var(--u));
+  font-size: calc(6 * var(--u));
+  font-weight: 600;
+  color: var(--tile-text);
+  line-height: 1.2;
+}
+.game.pressed { transform: scale(0.95); }
+.game.launching { opacity: 0.6; }
+.game.running { box-shadow: 0 0 0 calc(1 * var(--u)) var(--accent); }
+.game .badge {
+  position: absolute;
+  top: calc(4 * var(--u));
+  left: calc(4 * var(--u));
+  padding: calc(1 * var(--u)) calc(3 * var(--u));
+  border-radius: 99px;
+  background: var(--accent);
+  color: #fff;
+  font-size: calc(4.5 * var(--u));
+  font-weight: 700;
+  display: none;
+}
+.game.running .badge { display: block; }
+
 /* ---------- discord voice widget (bottom of the button page) ---------- */
 .buttons-page { display: flex; flex-direction: column; }
 
