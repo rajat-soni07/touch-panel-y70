@@ -1,0 +1,63 @@
+{
+  "display": "auto",
+  "noFocus": true,
+  "alwaysOnTop": true,
+  "statusIntervalMs": 3000,
+
+  "ui": {
+    "page": "transparent",
+    "card": "transparent",
+    "dock": "#2A303E",
+    "dockOpacity": 0.5,
+    "text": "#1A1A1B",
+    "name": "#161A25",
+    "sub": "#131A2E",
+    "track": "#24233A",
+    "accent": "#DE6549",
+    "ringWidth": 6,
+    "ringTrackOpacity": 0.25,
+    "tileText": "#F2F4F8",
+    "tileSub": "rgba(242, 244, 248, 0.55)",
+    "diskLabel": "All disks"
+  },
+
+  "sensors": {
+    "cpuTemp": "Tctl|Tdie|CPU Package|CPU Die",
+    "cpuTempMode": "avg",
+    "fps": "Framerate|FPS",
+    "fpsIgnore": "electron\\.exe|dwm\\.exe"
+  },
+
+  "buttons": [
+    { "id": "snip",   "label": "Snipping Tool", "icon": "assets/snipping-tool.png", "cmd": { "cmd": "explorer.exe shell:AppsFolder\\Microsoft.ScreenSketch_8wekyb3d8bbwe!App", "ignoreErrors": true } },
+    { "id": "tasks",  "label": "Task Manager",  "icon": "assets/task-manager.png",  "cmd": "start \"\" taskmgr" },
+    { "id": "chrome", "label": "Chrome",        "icon": "assets/chrome.png",        "cmd": "start \"\" \"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\"" },
+    { "id": "steam",  "label": "Steam",         "icon": "assets/steam.png",         "cmd": "start \"\" steam://open/main" }
+  ],
+
+  "pageButtons": [
+    {
+      "id": "vpn",
+      "type": "toggle",
+      "size": "full",
+      "label": "NordVPN",
+      "icon": "shield",
+      "onText": "Protected",
+      "offText": "Not connected",
+      "busyText": "Connecting…",
+      "on":  { "cmd": "\"C:\\Program Files\\NordVPN\\NordVPN.exe\" -c" },
+      "off": { "cmd": "\"C:\\Program Files\\NordVPN\\NordVPN.exe\" -d" },
+      "status": { "type": "interface", "match": "nord" },
+      "busyTimeoutMs": 25000
+    },
+    { "id": "vpn-sg", "label": "Singapore", "icon": "globe", "busy": "vpn", "cmd": { "cmd": "\"C:\\Program Files\\NordVPN\\NordVPN.exe\" -c -g \"Singapore\"" } },
+    { "id": "vpn-us", "label": "United States", "icon": "globe", "busy": "vpn", "cmd": { "cmd": "\"C:\\Program Files\\NordVPN\\NordVPN.exe\" -c -g \"United States\"" } },
+    { "id": "lock",  "label": "Lock PC", "icon": "lock", "cmd": "rundll32.exe user32.dll,LockWorkStation" },
+    { "id": "prev",  "label": "Previous",     "icon": "prev", "cmd": { "shell": "powershell", "cmd": "(New-Object -ComObject WScript.Shell).SendKeys([char]177)" } },
+    { "id": "play",  "label": "Play / Pause", "icon": "play", "cmd": { "shell": "powershell", "cmd": "(New-Object -ComObject WScript.Shell).SendKeys([char]179)" } },
+    { "id": "next",  "label": "Next",         "icon": "next", "cmd": { "shell": "powershell", "cmd": "(New-Object -ComObject WScript.Shell).SendKeys([char]176)" } },
+    { "id": "voldown", "label": "Volume −", "icon": "voldown", "cmd": { "shell": "powershell", "cmd": "$s=New-Object -ComObject WScript.Shell; 1..5 | % { $s.SendKeys([char]174) }" } },
+    { "id": "mute",    "label": "Mute",     "icon": "mute",    "cmd": { "shell": "powershell", "cmd": "(New-Object -ComObject WScript.Shell).SendKeys([char]173)" } },
+    { "id": "volup",   "label": "Volume +", "icon": "volup",   "cmd": { "shell": "powershell", "cmd": "$s=New-Object -ComObject WScript.Shell; 1..5 | % { $s.SendKeys([char]175) }" } }
+  ]
+}

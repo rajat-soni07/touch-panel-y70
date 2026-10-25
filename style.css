@@ -1,0 +1,309 @@
+/* Sizes are in design units: the reference layout is 255 units wide, so 1u scales with the panel. */
+:root {
+  --u: calc(100vw / 255);
+  --page: transparent; /* Wallpaper Engine shows through */
+  --card: transparent;
+  --dock: #2A303E;
+  --text: #1A1A1B;
+  --name: #161A25;
+  --sub: #131A2E;
+  --track: #24233A;
+  --accent: #DE6549;
+  --dock-opacity: 0.5;
+  --ring-width: 6;           /* in a 100-unit ring box */
+  --ring-track-opacity: 0.25;
+  --tile-text: #F2F4F8;
+  --tile-sub: rgba(242, 244, 248, 0.55);
+  --err: #ff5c7a;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--page);
+  overflow: hidden;
+  color: var(--text);
+  font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- card ---------- */
+.card {
+  position: absolute;
+  inset: calc(10 * var(--u)) calc(10 * var(--u));
+  background: var(--card);
+  border-radius: calc(10 * var(--u));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ---------- swipe pages ---------- */
+.pager {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  touch-action: pan-x;
+  scrollbar-width: none;
+}
+.pager::-webkit-scrollbar { display: none; }
+.page {
+  flex: 0 0 100%;
+  min-width: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  overflow: hidden;
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: calc(3 * var(--u));
+  padding: calc(6 * var(--u)) 0;
+}
+.dots i {
+  width: calc(4 * var(--u));
+  height: calc(4 * var(--u));
+  border-radius: 50%;
+  background: var(--track);
+  cursor: pointer;
+  transition: background 0.25s, width 0.25s;
+}
+.dots i.active { background: var(--accent); width: calc(10 * var(--u)); border-radius: 99px; }
+
+/* ---------- stats ---------- */
+.stats {
+  padding-top: calc(63 * var(--u));
+  display: flex;
+  flex-direction: column;
+}
+.row + .row { margin-top: calc(22 * var(--u)); }
+.row.three { margin-top: calc(10 * var(--u)); }
+
+.row { display: grid; }
+.row.two { grid-template-columns: 1fr 1fr; }
+.row.three { grid-template-columns: 1fr 1fr 1fr; }
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 0;
+}
+
+.name {
+  font-size: calc(5 * var(--u));
+  font-weight: 600;
+  color: var(--name);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 95%;
+}
+
+.num {
+  font-size: calc(25 * var(--u));
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: calc(-0.5 * var(--u));
+  font-variant-numeric: tabular-nums;
+  margin-top: calc(26 * var(--u));
+  position: relative;
+}
+/* Small unit tucked against the digits; number + unit are centred together, like the design */
+.num sup {
+  font-size: 0.34em;
+  font-weight: 600;
+  line-height: 1;
+  vertical-align: top;
+  position: relative;
+  top: 0.42em;
+  margin-left: calc(0.4 * var(--u));
+  letter-spacing: 0;
+}
+/* the ° glyph is small and sits high in the font, so it needs a bigger size and less lift */
+.num sup.deg { font-size: 0.5em; top: 0.22em; margin-left: 0; }
+
+.sub {
+  font-size: calc(4.2 * var(--u));
+  font-weight: 500;
+  color: var(--sub);
+  white-space: nowrap;
+}
+
+.stat.small .num { font-size: calc(21 * var(--u)); margin-top: calc(6 * var(--u)); }
+
+/* ---------- usage rings ---------- */
+.ring {
+  position: relative;
+  width: calc(62 * var(--u));
+  height: calc(62 * var(--u));
+  margin-top: calc(11 * var(--u));
+}
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+.ring circle { fill: none; stroke-width: var(--ring-width); }
+/* Unfilled part: same colour as the filled arc, just faded */
+.ring .track { stroke: var(--accent); stroke-opacity: var(--ring-track-opacity); stroke-dasharray: 6.5 1.83; }
+/* Filled part: same dashes as the track, revealed up to the current % by the mask */
+.ring .arc { stroke: var(--accent); stroke-dasharray: 6.5 1.83; }
+.ring .fill {
+  stroke: #fff;
+  stroke-width: calc(var(--ring-width) + 2);
+  stroke-dasharray: 0 100;
+  transition: stroke-dasharray 0.6s ease;
+}
+.ring-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.ring-text .num { margin-top: 0; font-size: calc(24 * var(--u)); top: calc(-1.1 * var(--u)); } /* optical centring: digit glyphs sit low in the line box */
+/* In the rings the digits themselves sit on the centre; the % hangs off to the right */
+.ring-text .num sup { position: absolute; left: 100%; }
+/* Keep the digits at the ring's centre; the caption sits below without pushing them up */
+.ring-text .sub { position: absolute; top: 69%; }
+
+/* ---------- button page ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(6 * var(--u));
+  padding: calc(63 * var(--u)) calc(4 * var(--u)) 0;
+  align-content: start;
+}
+
+.tile {
+  all: unset;
+  position: relative;
+  aspect-ratio: 1;
+  background: var(--dock);
+  border-radius: calc(8 * var(--u));
+  padding: calc(8 * var(--u));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  cursor: pointer;
+  color: var(--tile-text);
+  transition: transform 0.14s ease, box-shadow 0.25s, opacity 0.2s;
+}
+.tile.full {
+  grid-column: 1 / -1;
+  aspect-ratio: auto;
+  height: calc(46 * var(--u));
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: calc(8 * var(--u));
+  padding: 0 calc(10 * var(--u));
+}
+.tile.wide { grid-column: span 2; aspect-ratio: auto; }
+
+.tile .icon { width: calc(16 * var(--u)); height: calc(16 * var(--u)); flex: none; transition: color 0.25s; }
+.tile.full .icon { width: calc(20 * var(--u)); height: calc(20 * var(--u)); }
+.tile .icon svg, .tile .icon img { width: 100%; height: 100%; display: block; object-fit: contain; }
+
+.tile .label { font-size: calc(6 * var(--u)); font-weight: 600; line-height: 1.2; }
+.tile.full .label { font-size: calc(8 * var(--u)); }
+.tile .sub { font-size: calc(4.5 * var(--u)); color: var(--tile-sub); margin-top: calc(1 * var(--u)); min-height: 1.1em; }
+.tile.full .sub { font-size: calc(5.5 * var(--u)); }
+
+.tile .dot {
+  position: absolute;
+  top: calc(7 * var(--u));
+  right: calc(7 * var(--u));
+  width: calc(3 * var(--u));
+  height: calc(3 * var(--u));
+  border-radius: 50%;
+  background: var(--track);
+  display: none;
+}
+.tile.toggle .dot { display: block; }
+
+.tile.pressed { transform: scale(0.95); }
+.tile.running { opacity: 0.6; }
+.tile.on { box-shadow: inset 0 0 0 calc(0.8 * var(--u)) var(--accent); }
+.tile.on .icon { color: var(--accent); }
+.tile.on .dot { background: var(--accent); }
+.tile.busy .dot { background: var(--accent); animation: blink 1s ease-in-out infinite; }
+.tile.err { box-shadow: inset 0 0 0 calc(0.8 * var(--u)) var(--err); }
+
+/* ---------- dock ---------- */
+.dock {
+  margin: auto calc(2 * var(--u)) 0;
+  height: calc(62 * var(--u));
+  flex: none;
+  background: color-mix(in srgb, var(--dock) calc(var(--dock-opacity) * 100%), transparent);
+  border-radius: calc(8 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 calc(6 * var(--u));
+}
+
+.app {
+  all: unset;
+  position: relative;
+  width: calc(34 * var(--u));
+  height: calc(34 * var(--u));
+  display: grid;
+  place-items: center;
+  border-radius: calc(8 * var(--u));
+  cursor: pointer;
+  transition: transform 0.14s ease, opacity 0.2s, filter 0.2s;
+}
+.app img, .app svg { width: calc(30 * var(--u)); height: calc(30 * var(--u)); object-fit: contain; display: block; }
+.app svg { color: #fff; }
+
+.app.pressed { transform: scale(0.88); }
+.app.running { opacity: 0.6; }
+.app.on::after,
+.app.busy::after {
+  content: "";
+  position: absolute;
+  bottom: calc(-5 * var(--u));
+  width: calc(5 * var(--u));
+  height: calc(1.6 * var(--u));
+  border-radius: 99px;
+  background: var(--accent);
+}
+.app.busy::after { animation: blink 1s ease-in-out infinite; }
+.app.err { filter: drop-shadow(0 0 calc(4 * var(--u)) var(--err)); }
+
+@keyframes blink { 50% { opacity: 0.3; } }
+
+/* ---------- toast ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(80 * var(--u));
+  transform: translate(-50%, 20px);
+  max-width: 85%;
+  padding: 10px 18px;
+  border-radius: 14px;
+  background: rgba(20, 10, 16, 0.9);
+  border: 1px solid color-mix(in srgb, var(--err) 60%, transparent);
+  color: #f2f4ff;
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }

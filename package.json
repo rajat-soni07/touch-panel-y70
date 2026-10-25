@@ -1,0 +1,16 @@
+{
+  "name": "touch-panel",
+  "version": "1.0.0",
+  "description": "Transparent touch button panel that sits over Wallpaper Engine on a secondary touch display",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^37.0.0"
+  },
+  "allowScripts": {
+    "electron@37.10.3": true
+  }
+}

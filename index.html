@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src 'self' file: data:; style-src 'self' 'unsafe-inline'; script-src 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Touch Panel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="card">
+    <div class="pager" id="pager">
+    <section class="page stats">
+      <div class="row two">
+        <div class="stat">
+          <div class="name" id="cpu-name">CPU</div>
+          <div class="num"><span id="cpu-temp">–</span><sup class="deg">°</sup></div>
+          <div class="sub">CPU temperature</div>
+        </div>
+        <div class="stat">
+          <div class="name" id="gpu-name">GPU</div>
+          <div class="num"><span id="gpu-temp">–</span><sup class="deg">°</sup></div>
+          <div class="sub">GPU temperature</div>
+        </div>
+      </div>
+
+      <div class="row two">
+        <div class="stat">
+          <div class="name" id="cpu-name2">CPU</div>
+          <div class="ring" id="cpu-ring">
+            <svg viewBox="0 0 100 100">
+              <mask id="cpu-fill"><circle class="fill" cx="50" cy="50" r="45" pathLength="100"/></mask>
+              <circle class="track" cx="50" cy="50" r="45" pathLength="100"/>
+              <circle class="arc" cx="50" cy="50" r="45" pathLength="100" mask="url(#cpu-fill)"/>
+            </svg>
+            <div class="ring-text">
+              <div class="num"><span id="cpu-load">–</span><sup>%</sup></div>
+              <div class="sub">CPU</div>
+            </div>
+          </div>
+        </div>
+        <div class="stat">
+          <div class="name" id="gpu-name2">GPU</div>
+          <div class="ring" id="gpu-ring">
+            <svg viewBox="0 0 100 100">
+              <mask id="gpu-fill"><circle class="fill" cx="50" cy="50" r="45" pathLength="100"/></mask>
+              <circle class="track" cx="50" cy="50" r="45" pathLength="100"/>
+              <circle class="arc" cx="50" cy="50" r="45" pathLength="100" mask="url(#gpu-fill)"/>
+            </svg>
+            <div class="ring-text">
+              <div class="num"><span id="gpu-load">–</span><sup>%</sup></div>
+              <div class="sub">GPU</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row three">
+        <div class="stat small">
+          <div class="name">Total memory</div>
+          <div class="num"><span id="ram">–</span><sup>%</sup></div>
+          <div class="sub">Memory usage</div>
+        </div>
+        <div class="stat small">
+          <div class="name">FPS</div>
+          <div class="num"><span id="fps">–</span></div>
+          <div class="sub">Frames per second</div>
+        </div>
+        <div class="stat small">
+          <div class="name" id="disk-name">Disk</div>
+          <div class="num"><span id="disk">–</span><sup>%</sup></div>
+          <div class="sub">Disk activity</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page">
+      <div class="grid" id="grid"></div>
+    </section>
+    </div>
+
+    <div class="dots" id="dots"><i data-page="0"></i><i data-page="1"></i></div>
+
+    <nav class="dock" id="dock"></nav>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
