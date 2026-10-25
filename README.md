@@ -83,10 +83,25 @@ The bottom of page 2 shows your current Discord voice channel, who's in it (spea
 
 `discord-auth.json` is git-ignored; never commit it. Set `"discord": { "enabled": false }` in `config.json` to turn the widget off, and `maxMembers` to change how many people are listed.
 
-## Steam quick-launch
+## Game quick-launch
 
-Tapping the **Steam icon in the dock** opens a *Recently played* sheet with your most recently played **installed** games as covers; tap one to launch it (the sheet closes), or use **Open Steam** for the Steam window. Tap outside the sheet or the Steam icon again to close it. The game that's currently running gets an orange outline and a "Playing" badge.
+Tapping the **Steam icon in the dock** opens a *Recently played* sheet with your installed games as covers, most recently played first; tap one to launch it (the sheet closes), or use **Open Steam** for the Steam window. Tap outside the sheet or the Steam icon again to close it. A running game gets an orange outline and a "Playing" badge and moves to the front.
 
-Everything is read from Steam's local files (no login or API key): libraries from `steamapps/libraryfolders.vdf`, last-played times from each `appmanifest_*.acf`, covers from `appcache/librarycache`, and the running game from the `RunningAppID` registry value. The list refreshes every 15 seconds.
+**Steam games** are found automatically from Steam's local files (no login or API key): libraries from `steamapps/libraryfolders.vdf`, last-played times from each `appmanifest_*.acf`, covers from `appcache/librarycache`, and the running game from the `RunningAppID` registry value.
 
-`config.json` → `steam`: `count` (how many covers, default 12), `exclude` (app IDs to hide — Wallpaper Engine, 431960, is hidden by default; redistributables and runtimes are always hidden), `enabled: false` to turn it off (the Steam icon then just opens Steam). The sheet is wired to the dock button through `"popup": "steam"` on that button in `buttons`.
+**Other games** are listed in `config.json` → `games.extra`:
+```json
+{ "id": "valorant", "name": "VALORANT",
+  "exe": "D:\Games\Riot Games\Riot Client\RiotClientServices.exe",
+  "args": "--launch-product=valorant --launch-patchline=live",
+  "process": "VALORANT-Win64-Shipping.exe",
+  "cover": "assets/covers/valorant.png" }
+```
+- `exe` is started from its own folder, with `args` if given. Entries whose `exe` no longer exists are hidden.
+- `process` is the process to watch for "Playing" / last played (defaults to the `exe` file name). Set it when a launcher or `.bat` starts a differently named game process.
+- `cover` is a portrait image (600×900 looks best). Without one the tile shows the name.
+- Nothing on disk records when these were last played, so the panel stamps `game-history.json` (git-ignored) whenever their process is running. Until then they sort after games that have been played.
+
+**Always full rows.** The list is capped at `count`, rounded down to whole rows of three. If your installed games don't fill it, the remaining slots go to your most recently played Steam games that **aren't installed** (dimmed, with a download badge; tapping one opens Steam's install prompt). Their names and app types come from the Steam store, looked up once and cached in `game-cache.json` (git-ignored); only real games with a cached cover are used. Set `fillWithUninstalled: false` to turn this off.
+
+`config.json` → `games`: `count` (how many covers, default 12), `exclude` (Steam app IDs to hide — Wallpaper Engine, 431960, is hidden by default; redistributables and runtimes are always hidden), `enabled: false` to turn the sheet off (the Steam icon then just opens Steam). The sheet is wired to the dock button through `"popup": "games"` on that button in `buttons`. The list refreshes every 15 seconds.

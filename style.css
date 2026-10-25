@@ -335,6 +335,22 @@ html, body {
 }
 .game.running .badge { display: block; }
 
+/* Played before but not installed: tapping opens Steam's install prompt */
+.game.not-installed img { opacity: 0.55; filter: saturate(0.6); }
+.game .download {
+  position: absolute;
+  right: calc(4 * var(--u));
+  bottom: calc(4 * var(--u));
+  width: calc(12 * var(--u));
+  height: calc(12 * var(--u));
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--tile-text);
+  display: grid;
+  place-items: center;
+}
+.game .download svg { width: calc(7 * var(--u)); height: calc(7 * var(--u)); }
+
 /* ---------- discord voice widget (bottom of the button page) ---------- */
 .buttons-page { display: flex; flex-direction: column; }
 

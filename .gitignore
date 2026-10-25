@@ -1,3 +1,5 @@
 node_modules/
 *.log
 discord-auth.json
+game-history.json
+game-cache.json

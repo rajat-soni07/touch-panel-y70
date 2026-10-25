@@ -33,17 +33,25 @@
     "maxMembers": 5
   },
 
-  "steam": {
+  "games": {
     "enabled": true,
-    "count": 12,
-    "exclude": [431960]
+    "count": 15,
+    "fillWithUninstalled": true,
+    "exclude": [431960],
+    "extra": [
+      { "id": "re-requiem",    "name": "Resident Evil Requiem",         "exe": "D:\\Games\\Resident Evil Requiem\\re9.exe",                       "cover": "assets/covers/re-requiem.jpg" },
+      { "id": "battlefield-6", "name": "Battlefield 6",                 "exe": "D:\\Games\\Battlefield 6\\bf6.exe",                               "cover": "assets/covers/battlefield-6.jpg" },
+      { "id": "cod-mw4",       "name": "Call of Duty: Modern Warfare 4", "exe": "D:\\Games\\Call of Duty Modern Warfare 4\\!start_sp26.bat",     "process": "sp26-cod.exe", "cover": "assets/covers/cod-mw4.jpg" },
+      { "id": "uncharted-4",   "name": "Uncharted 4",                   "exe": "D:\\Games\\Uncharted\\u4.exe",                                    "cover": "assets/covers/uncharted-4.jpg" },
+      { "id": "valorant",      "name": "VALORANT",                      "exe": "D:\\Games\\Riot Games\\Riot Client\\RiotClientServices.exe", "args": "--launch-product=valorant --launch-patchline=live", "process": "VALORANT-Win64-Shipping.exe", "cover": "assets/covers/valorant.png" }
+    ]
   },
 
   "buttons": [
     { "id": "snip",   "label": "Screenshot",    "icon": "assets/snipping-tool.png", "cmd": "start \"\" ms-screenclip:" },
     { "id": "tasks",  "label": "Task Manager",  "icon": "assets/task-manager.png",  "cmd": "start \"\" taskmgr" },
     { "id": "chrome", "label": "Chrome",        "icon": "assets/chrome.png",        "cmd": "start \"\" \"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\"" },
-    { "id": "steam",  "label": "Steam",         "icon": "assets/steam.png",         "popup": "steam", "cmd": "start \"\" steam://open/main" }
+    { "id": "steam",  "label": "Steam",         "icon": "assets/steam.png",         "popup": "games", "cmd": "start \"\" steam://open/main" }
   ],
 
   "pageButtons": [

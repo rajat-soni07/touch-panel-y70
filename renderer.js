@@ -95,8 +95,8 @@ function render() {
   dock.innerHTML = '';
   for (const b of cfg.buttons) {
     if (!b.id) continue;
-    // "popup": "steam" opens the Recently played sheet instead of running the button's command
-    const onClick = b.popup === 'steam' ? () => toggleGames(b) : undefined;
+    // "popup": "games" opens the Recently played sheet instead of running the button's command
+    const onClick = b.popup === 'games' ? () => toggleGames(b) : undefined;
     dock.appendChild(makeButton(b, 'app', iconHTML(b.icon), onClick));
     applyState(b.id);
   }
@@ -163,10 +163,10 @@ async function press(b, el) {
   }
 }
 
-// ---------- steam quick-launch ----------
+// ---------- game quick-launch ----------
 
-let steamState = null;
-let steamButton = null; // the dock button that opened the sheet; "Open Steam" runs its command
+let gamesState = null;
+let sheetButton = null; // the dock button that opened the sheet; "Open Steam" runs its command
 
 function setGamesOpen(open) {
   $('games').classList.toggle('open', open);
@@ -174,10 +174,10 @@ function setGamesOpen(open) {
 }
 
 function toggleGames(b) {
-  steamButton = b;
-  const games = (steamState && steamState.games) || [];
-  // Nothing to show (widget off, or no installed games): behave like a normal Steam button
-  if ((cfg.steam && cfg.steam.enabled === false) || games.length === 0) {
+  sheetButton = b;
+  const games = (gamesState && gamesState.games) || [];
+  // Nothing to show (list off, or no installed games): behave like a normal button
+  if ((cfg.games && cfg.games.enabled === false) || games.length === 0) {
     return press(b, document.querySelector(`.app[data-id="${CSS.escape(b.id)}"]`));
   }
   setGamesOpen(!$('games').classList.contains('open'));
@@ -192,13 +192,13 @@ for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) {
 }
 openSteam.addEventListener('click', async () => {
   setGamesOpen(false);
-  if (!steamButton) return;
-  const r = await window.panel.press(steamButton.id);
+  if (!sheetButton) return;
+  const r = await window.panel.press(sheetButton.id);
   if (!r.ok) toast(`Steam: ${(r.err || 'failed').split('\n')[0]}`);
 });
 
 function renderGames(s) {
-  steamState = s;
+  gamesState = s;
   const games = (s && s.games) || [];
   if (games.length === 0) setGamesOpen(false);
 
@@ -206,8 +206,8 @@ function renderGames(s) {
   grid.innerHTML = '';
   for (const g of games) {
     const el = document.createElement('button');
-    el.className = 'game' + (g.id === s.running ? ' running' : '');
-    el.title = g.name;
+    el.className = 'game' + (g.running ? ' running' : '') + (g.installed === false ? ' not-installed' : '');
+    el.title = g.installed === false ? `${g.name} (not installed)` : g.name;
     if (g.cover) {
       const img = document.createElement('img');
       img.src = g.cover;
@@ -224,6 +224,12 @@ function renderGames(s) {
     badge.className = 'badge';
     badge.textContent = 'Playing';
     el.appendChild(badge);
+    if (g.installed === false) {
+      const dl = document.createElement('span');
+      dl.className = 'download';
+      dl.innerHTML = svgIcon('<path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/>');
+      el.appendChild(dl);
+    }
 
     el.addEventListener('pointerdown', () => el.classList.add('pressed'));
     for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) {
@@ -232,8 +238,8 @@ function renderGames(s) {
     el.addEventListener('click', async () => {
       if (el.classList.contains('launching')) return;
       el.classList.add('launching');
-      const r = await window.panel.launchGame(g.id);
-      // Steam takes a while to start the game; don't let repeat taps queue launches
+      const r = await window.panel.launchGame(g.key);
+      // Games take a while to start; don't let repeat taps queue launches
       setTimeout(() => el.classList.remove('launching'), r.ok ? 8000 : 0);
       if (r.ok) setGamesOpen(false);
       else toast(`${g.name}: ${(r.err || 'failed').split('\n')[0]}`);
@@ -242,7 +248,7 @@ function renderGames(s) {
   }
 }
 
-window.panel.on('steam', renderGames);
+window.panel.on('games', renderGames);
 
 // ---------- discord ----------
 
@@ -397,7 +403,7 @@ window.panel.on('config', (data) => {
   states = data.states || {};
   render();
   renderDiscord(dcState);
-  renderGames(steamState);
+  renderGames(gamesState);
 });
 
 document.addEventListener('contextmenu', (e) => e.preventDefault()); // long-press
@@ -408,5 +414,5 @@ document.addEventListener('contextmenu', (e) => e.preventDefault()); // long-pre
   states = data.states || {};
   render();
   renderDiscord(data.discord);
-  renderGames(data.steam);
+  renderGames(data.games);
 })();

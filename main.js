@@ -9,7 +9,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { DiscordVoice } = require('./discord');
-const { recentGames } = require('./steam');
+const { recentGames, launchSpec } = require('./games');
 
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 
@@ -145,31 +145,37 @@ function statusLoop() {
 
 // ---------- button presses ----------
 
-ipcMain.handle('config', () => ({ config, states, discord: discordState, steam: steamState }));
+ipcMain.handle('config', () => ({ config, states, discord: discordState, games: gamesState }));
 
-// ---------- steam quick-launch ----------
+// ---------- game quick-launch ----------
 
-let steamState = null;
+let gamesState = null;
 
-async function steamLoop() {
-  const opts = config.steam || {};
+async function gamesLoop() {
+  const opts = config.games || {};
   if (opts.enabled !== false) {
     try {
-      const next = await recentGames({ count: opts.count || 6, exclude: opts.exclude || [] });
-      if (JSON.stringify(next) !== JSON.stringify(steamState)) {
-        steamState = next;
-        send('steam', steamState);
+      const next = await recentGames({
+        count: opts.count || 12,
+        exclude: opts.exclude || [],
+        extra: opts.extra || [],
+        fill: opts.fillWithUninstalled !== false,
+      });
+      if (JSON.stringify(next) !== JSON.stringify(gamesState)) {
+        gamesState = next;
+        send('games', gamesState);
       }
     } catch (e) {
-      console.error('[panel] steam scan failed:', e.message);
+      console.error('[panel] game scan failed:', e.message);
     }
   }
-  setTimeout(steamLoop, 15000);
+  setTimeout(gamesLoop, 15000);
 }
 
-ipcMain.handle('steam-launch', (_e, appId) => {
-  if (!/^\d+$/.test(String(appId))) return { ok: false, err: 'Bad app id' };
-  return run(`start "" steam://rungameid/${appId}`);
+// Only launches games the panel listed itself: Steam app IDs or ids from games.extra
+ipcMain.handle('game-launch', (_e, key) => {
+  const spec = launchSpec(String(key), (config.games && config.games.extra) || []);
+  return spec ? run(spec) : { ok: false, err: 'Unknown game' };
 });
 
 // ---------- discord ----------
@@ -417,7 +423,7 @@ if (!app.requestSingleInstanceLock()) {
     createWindow();
     statusLoop();
     startDiskMonitor();
-    steamLoop();
+    gamesLoop();
     if (!config.discord || config.discord.enabled !== false) {
       discord = new DiscordVoice((s) => {
         discordState = s;
