@@ -161,6 +161,115 @@ async function press(b, el) {
   }
 }
 
+// ---------- discord ----------
+
+const svgIcon = (paths) =>
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+const DC_ICONS = {
+  mic: ICONS.mic,
+  micOff: ICONS.mic + '<path d="M4 4l16 16"/>',
+  headphones: '<path d="M4 15v-3a8 8 0 0116 0v3"/><path d="M4 15h3v5H4z"/><path d="M17 15h3v5h-3z"/>',
+  headphonesOff: '<path d="M4 15v-3a8 8 0 0116 0v3"/><path d="M4 15h3v5H4z"/><path d="M17 15h3v5h-3z"/><path d="M3 3l18 18"/>',
+};
+const DC_STATUS = {
+  setup: ['Discord', 'Add your app to discord-auth.json (see README)'],
+  closed: ['Discord', 'Not running'],
+  connecting: ['Discord', 'Connecting…'],
+  auth: ['Discord', 'Approve the touch panel in Discord'],
+};
+let dcState = null;
+let dcOpening = false; // tapped "open" and waiting for Discord to come up
+
+function renderDiscord(s) {
+  dcState = s;
+  const box = $('discord');
+  box.classList.toggle('hidden', !!(cfg.discord && cfg.discord.enabled === false) || !s);
+  if (!s) return;
+
+  const ready = s.status === 'ready';
+  box.classList.toggle('openable', s.status === 'closed');
+  let [title, subtitle] = DC_STATUS[s.status] || ['Discord', s.message || 'Something went wrong'];
+  if (s.status === 'closed' && dcOpening) subtitle = 'Starting Discord…';
+  if (s.status !== 'closed') dcOpening = false;
+  if (ready) {
+    title = s.channel ? s.channel.name : 'Not in a voice channel';
+    subtitle = s.channel ? s.channel.guild : 'Join a channel in Discord';
+  }
+  setText('dc-title', title);
+  setText('dc-subtitle', subtitle);
+
+  const list = $('dc-members');
+  list.innerHTML = '';
+  if (ready && s.channel) {
+    const max = (cfg.discord && cfg.discord.maxMembers) || 5;
+    // Speakers first, then alphabetical
+    const members = [...s.members].sort((a, b) => b.speaking - a.speaking || a.name.localeCompare(b.name));
+    for (const m of members.slice(0, max)) {
+      const row = document.createElement('div');
+      row.className = 'dc-member' + (m.speaking ? ' speaking' : '');
+      const img = document.createElement('img');
+      img.src = m.avatar;
+      img.alt = '';
+      img.draggable = false;
+      const name = document.createElement('div');
+      name.className = 'dc-name';
+      name.textContent = m.name;
+      const flags = document.createElement('div');
+      flags.className = 'dc-flags';
+      // Deafened also means muted, so it gets both icons
+      flags.innerHTML = (m.muted || m.deaf ? svgIcon(DC_ICONS.micOff) : '') + (m.deaf ? svgIcon(DC_ICONS.headphonesOff) : '');
+      row.append(img, name, flags);
+      list.appendChild(row);
+    }
+    if (members.length > max) {
+      const more = document.createElement('div');
+      more.className = 'dc-more';
+      more.textContent = `+${members.length - max} more`;
+      list.appendChild(more);
+    }
+  }
+
+  document.querySelector('.dc-actions').classList.toggle('hidden', !ready);
+  const mute = $('dc-mute');
+  const deaf = $('dc-deaf');
+  mute.classList.toggle('on', s.self.mute);
+  deaf.classList.toggle('on', s.self.deaf);
+  mute.innerHTML = svgIcon(s.self.mute ? DC_ICONS.micOff : DC_ICONS.mic) + `<span>${s.self.mute ? 'Unmute' : 'Mute'}</span>`;
+  deaf.innerHTML = svgIcon(s.self.deaf ? DC_ICONS.headphonesOff : DC_ICONS.headphones) + `<span>${s.self.deaf ? 'Undeafen' : 'Deafen'}</span>`;
+}
+
+for (const btn of document.querySelectorAll('.dc-btn')) {
+  btn.addEventListener('pointerdown', () => btn.classList.add('pressed'));
+  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) {
+    btn.addEventListener(ev, () => btn.classList.remove('pressed'));
+  }
+  btn.addEventListener('click', async () => {
+    const r = await window.panel.discord(btn.dataset.action);
+    if (!r.ok) toast(`Discord: ${r.err || 'failed'}`);
+  });
+}
+
+// While Discord is closed the whole widget is a button that launches it
+const dcBox = $('discord');
+dcBox.addEventListener('pointerdown', () => dcBox.classList.contains('openable') && dcBox.classList.add('pressed'));
+for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) {
+  dcBox.addEventListener(ev, () => dcBox.classList.remove('pressed'));
+}
+dcBox.addEventListener('click', async () => {
+  if (!dcBox.classList.contains('openable') || dcOpening) return;
+  const r = await window.panel.discord('open');
+  if (!r.ok) return toast(`Discord: ${r.err || 'failed'}`);
+  dcOpening = true;
+  renderDiscord(dcState);
+  setTimeout(() => {
+    // Discord never came up — let the tap work again
+    dcOpening = false;
+    renderDiscord(dcState);
+  }, 60000);
+});
+
+window.panel.on('discord', renderDiscord);
+
 // ---------- stats ----------
 
 const show = (v) => (Number.isFinite(v) ? String(Math.round(v)) : '–');
@@ -204,6 +313,7 @@ window.panel.on('config', (data) => {
   cfg = data.config;
   states = data.states || {};
   render();
+  renderDiscord(dcState);
 });
 
 document.addEventListener('contextmenu', (e) => e.preventDefault()); // long-press
@@ -213,4 +323,5 @@ document.addEventListener('contextmenu', (e) => e.preventDefault()); // long-pre
   cfg = data.config;
   states = data.states || {};
   render();
+  renderDiscord(data.discord);
 })();

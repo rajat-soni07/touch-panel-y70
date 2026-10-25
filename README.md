@@ -67,3 +67,18 @@ Edit `config.json`. The panel reloads by itself when you save.
 - `ignoreErrors`: put this inside a command object to suppress error toasts if a program returns odd exit codes.
 - `ui.showStats`: any of `clock cpu gpu ram`. Use `[]` for buttons only.
 - `noFocus: true`: tapping the panel doesn't take focus away from your game.
+
+## Discord voice widget
+
+The bottom of page 2 shows your current Discord voice channel, who's in it (speakers get a green ring), and Mute / Deafen buttons that reflect and change your real state. It talks to the Discord desktop app over its local RPC pipe.
+
+**One-time setup**
+1. Go to <https://discord.com/developers/applications> → **New Application** (any name, e.g. "Touch Panel").
+2. In **OAuth2**: copy the **Client ID**, click **Reset Secret** and copy the **Client Secret**, and under **Redirects** add `http://localhost` → **Save Changes**.
+3. Create `discord-auth.json` next to `config.json`:
+   ```json
+   { "clientId": "YOUR_CLIENT_ID", "clientSecret": "YOUR_CLIENT_SECRET" }
+   ```
+4. Discord pops up an **Authorize** dialog the first time — approve it. The panel stores the login tokens in the same file and refreshes them on its own.
+
+`discord-auth.json` is git-ignored; never commit it. Set `"discord": { "enabled": false }` in `config.json` to turn the widget off, and `maxMembers` to change how many people are listed.

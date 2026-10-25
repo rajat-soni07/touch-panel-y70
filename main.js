@@ -8,6 +8,7 @@ const { exec, execFile, spawn } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { DiscordVoice } = require('./discord');
 
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 
@@ -143,7 +144,25 @@ function statusLoop() {
 
 // ---------- button presses ----------
 
-ipcMain.handle('config', () => ({ config, states }));
+ipcMain.handle('config', () => ({ config, states, discord: discordState }));
+
+// ---------- discord ----------
+
+let discord = null;
+let discordState = null;
+
+// Same command as Discord's own Start-menu shortcut
+function openDiscord() {
+  const updater = path.join(process.env.LOCALAPPDATA || '', 'Discord', 'Update.exe');
+  if (!fs.existsSync(updater)) return { ok: false, err: 'Discord is not installed' };
+  spawn(updater, ['--processStart', 'Discord.exe'], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
+  return { ok: true };
+}
+
+ipcMain.handle('discord', (_e, action) => {
+  if (action === 'open') return openDiscord();
+  return discord ? discord.toggle(action) : { ok: false, err: 'Discord widget is turned off' };
+});
 
 ipcMain.handle('press', async (_e, id) => {
   const b = allButtons().find((x) => x.id === id);
@@ -372,6 +391,13 @@ if (!app.requestSingleInstanceLock()) {
     createWindow();
     statusLoop();
     startDiskMonitor();
+    if (!config.discord || config.discord.enabled !== false) {
+      discord = new DiscordVoice((s) => {
+        discordState = s;
+        send('discord', s);
+      });
+      discord.start();
+    }
     statsLoop();
     setInterval(applyOnTop, 2000);
 
@@ -405,6 +431,7 @@ if (!app.requestSingleInstanceLock()) {
 
   app.on('will-quit', () => {
     app.isQuitting = true;
+    if (discord) discord.stop();
     if (diskProc) diskProc.kill();
     globalShortcut.unregisterAll();
   });

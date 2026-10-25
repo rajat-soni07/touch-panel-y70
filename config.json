@@ -28,6 +28,11 @@
     "fpsIgnore": "electron\\.exe|dwm\\.exe"
   },
 
+  "discord": {
+    "enabled": true,
+    "maxMembers": 5
+  },
+
   "buttons": [
     { "id": "snip",   "label": "Snipping Tool", "icon": "assets/snipping-tool.png", "cmd": { "cmd": "explorer.exe shell:AppsFolder\\Microsoft.ScreenSketch_8wekyb3d8bbwe!App", "ignoreErrors": true } },
     { "id": "tasks",  "label": "Task Manager",  "icon": "assets/task-manager.png",  "cmd": "start \"\" taskmgr" },
@@ -50,7 +55,7 @@
       "status": { "type": "interface", "match": "nord" },
       "busyTimeoutMs": 25000
     },
-    { "id": "vpn-sg", "label": "Singapore", "icon": "globe", "busy": "vpn", "cmd": { "cmd": "\"C:\\Program Files\\NordVPN\\NordVPN.exe\" -c -g \"Singapore\"" } },
+    { "id": "vpn-de", "label": "Germany", "icon": "globe", "busy": "vpn", "cmd": { "cmd": "\"C:\\Program Files\\NordVPN\\NordVPN.exe\" -c -g \"Germany\"" } },
     { "id": "vpn-us", "label": "United States", "icon": "globe", "busy": "vpn", "cmd": { "cmd": "\"C:\\Program Files\\NordVPN\\NordVPN.exe\" -c -g \"United States\"" } },
     { "id": "lock",  "label": "Lock PC", "icon": "lock", "cmd": "rundll32.exe user32.dll,LockWorkStation" },
     { "id": "prev",  "label": "Previous",     "icon": "prev", "cmd": { "shell": "powershell", "cmd": "(New-Object -ComObject WScript.Shell).SendKeys([char]177)" } },
